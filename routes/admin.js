@@ -5,7 +5,7 @@ const router = express.Router();
 const db = require("../bdd/connexion_MSD");
 
 const bcrypt = require('bcrypt');
-const saltRounds = 10; // Nombre de tours de salage
+const saltRounds = 5; // Nombre de tours de salage
 
 db.connect(function(err) {   
     if (err) {
@@ -18,30 +18,45 @@ db.connect(function(err) {
 });
 
 
+
 router.post('/', (req, res) => {
     const id = req.body.id;
+    // Le mot de passe est reçu en clair du formulaire
     const password = req.body.password;
-  
-    const query = 'SELECT * FROM admin WHERE id = ? AND password = ?';
-  db.query(query, [id, password], (err, result) => {
-      if (err) {
-          console.error('Erreur lors de la récupération des données:', err);
-          res.status(500).json({ error: 'Erreur lors de la récupération des données' });
-          return;
-      }
-  
-      if (result.length > 0) {
-          const admin = result[0];
-          if (admin.password === password) {
-              res.json({ valid: true });
-          } else {
-              res.json({ valid: false });
-          }
-      } else {
-          res.json({ valid: false });
-      }
-   });
-  });
+
+    // Modifier la requête pour ne pas inclure le mot de passe dans la condition
+    const query = 'SELECT * FROM admin WHERE id = ?';
+    db.query(query, [id], (err, result) => {
+        if (err) {
+            console.error('Erreur lors de la récupération des données:', err);
+            res.status(500).json({ error: 'Erreur lors de la récupération des données' });
+            return;
+        }
+
+        if (result.length > 0) {
+            const admin = result[0];
+            // Utiliser bcrypt pour comparer le mot de passe fourni avec le mot de passe haché stocké
+            bcrypt.compare(password, admin.password, (err, isMatch) => {
+                if (err) {
+                    console.error('Erreur lors de la comparaison des mots de passe:', err);
+                    res.status(500).json({ error: 'Erreur technique' });
+                    return;
+                }
+
+                if (isMatch) {
+                    // Si les mots de passe correspondent
+                    res.json({ valid: true });
+                } else {
+                    // Si les mots de passe ne correspondent pas
+                    res.json({ valid: false });
+                }
+            });
+        } else {
+            // Si aucun utilisateur n'est trouvé avec l'ID fourni
+            res.json({ valid: false });
+        }
+    });
+});
 
   router.post('/add', (req, res) => {
     const id = req.body.id;
@@ -90,10 +105,3 @@ router.post('/', (req, res) => {
   
 module.exports = router;
 
-/*CREATE TABLE IF NOT EXISTS `admin` (
-    `id_` int NOT NULL AUTO_INCREMENT,
-    `id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-    `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-    PRIMARY KEY (`id_`)
-  ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-   */
