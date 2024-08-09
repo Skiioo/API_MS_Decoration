@@ -92,18 +92,3 @@ router.post('/', (req, res) => {
 module.exports = router;
 
 
-/*
-DROP TABLE IF EXISTS `devis`;
-CREATE TABLE IF NOT EXISTS `devis` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `nom` varchar(255) NOT NULL,
-  `prenom` varchar(255) NOT NULL,
-  `societe` varchar(255) NOT NULL,
-  `surface` int NOT NULL,
-  `estimation` int NOT NULL,
-  `peinture` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `date_demande` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-COMMIT;*/
