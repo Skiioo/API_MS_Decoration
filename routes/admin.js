@@ -101,6 +101,17 @@ router.post('/', (req, res) => {
     });
   });
 
+  router.get('/', (req, res) => {
+    db.query('SELECT * FROM `admin`', (err, rows) => {
+        if(err) {
+            console.error('Erreur lors de la récupération des données:', err);
+            res.status(500).json({ error: 'Erreur lors de la récupération des données' });
+            return;
+        }
+        res.status(200).json(rows);
+    });
+});
+
 
   
 module.exports = router;
